@@ -1,0 +1,221 @@
+Basado en el vídeo:
+https://www.youtube.com/watch?v=LG4GjdPXqz0	
+1:04:38	[Meetup] Seguridad en aplicaciones web con Spring Security 4
+SPRING SECURITY 4 (TOMCAT 7 con el puerto 8443 de HTTPS)
+Seguridad en JEE standard:
+- Basada en restricciones
+- Perimetral
+
+Lo único standard es lo que va en el web.xml
+2:10 -> En cambio SPRING SECURITY…
+aporta seguridad en la parte web y tb en la parte del modelo (llamadas a métodos…)
+
+3:09 -> Ejemplo con SPRING, SPRING MVC y JSP (AUNQUE DE SPRING Y SPRING WEV, EN EL PROYECTO NO HAY NADA, SOLO LAS LIBRERIAS, QUE NO SE UTILIZAN PARA NADA, AL MENOS INICIALMENTE <= ESTO NO ES CIERTO, USA SPRING MVC CON ANOTACIONES (P.EJ. @Controller) Y SPRING TB CON ANOTACIONES (P.EJ. @Autowired)): 
+
+SpringSecurity4 , que es la misma que en el vídeo: Codemotion 2014: Seguridad aplicaciones web con Spring Security 3.x - Fernando Redondo
+llamaron fbi
+4:37 -> Empieza a añadirle seguridad a la aplicación, siguiendo los pasos que se describe en el fichero "pasos.txt" que viene en el META-INF de la aplicación.
+
+(La aplicación, estaba preparada para TOMCAT 7, así que he tenido que instalar en ECLIPSE ese servidor)
+
+4:40 -> FUNCIONALIDADES
+
+5:00 -> Autenticación BASIC, DIGEST, FORM-BASED. Se explica mejor en:
+https://diego.com.es/autenticacion-http
+http://infolib.lotus.com/resources/portal/8.0.0/doc/es_es/PT800ACD022/8001/admin/wab_use_form.html
+
+(Sigue en le celda de al lado)
+
+OPEN ID:  
+https://es.wikipedia.org/wiki/OpenID
+http://jhonfener123.blogspot.com.es/2013/10/que-es-openid-y-como-funciona.html
+
+SSO:
+https://es.wikipedia.org/wiki/Single_Sign-On
+https://sic.us.es/servicios/cuentas-y-accesos-los-servicios/integracion-con-sso/que-es-sso
+
+CSRF:
+https://es.wikipedia.org/wiki/Cross-site_request_forgery
+https://www.welivesecurity.com/la-es/2015/04/21/vulnerabilidad-cross-site-request-forgery-csrf/
+XSS:
+https://es.wikipedia.org/wiki/Cross-site_scripting
+
+5:28 -> MÁS FUNCIONALIDADES
+ACL:
+https://es.wikipedia.org/wiki/Lista_de_control_de_acceso
+
+SPRING WEB FLOW:
+https://es.wikipedia.org/wiki/Spring_Web_Flow
+
+5:50 -> Filtro interceptor de peticiones web
+Dependencias en el pom.xml:
+spring-security-web (LIBRERÍA: spring-security-core-4.1.0.RELEASE.jar ...no sé si es esta o no, hay tb otra:
+                                                            spring-security-acl\4.1.0.RELEASE\spring-security-acl-4.1.0.RELEASE.jar )
+spring-security-config (LIBRERÍA: spring-security-config-4.1.0.RELEASE.jar)
+spring-security-taglibs (LIBRERÍA: spring-security-taglibs-4.1.0.RELEASE.jar)
+
+(Sigue en la celda de abajo)
+
+6:00 -> FILTROS (es standard de java EE) en el contenedor de servlets. Programación orientada a aspectos (AOP)
+En la nueva clase "AppInitializer" que implementa "WebApplicationInitializer", se da de alta el DispatcherServlet de SPRING MVC y tb se da de alta un (uno solo) filtro:
+springSecurityFilterChain
+(esto no está en el código descargado, pero se puede copiar. Parte de ello viene en "pasos.txt")
+AQUI NO HAY XML NI ANOTACIONES, ESTÁ HECHO CON JAVA CONFIG
+
+BUSCAR UN PROYECTO SPRING MVC QUE USE ModelAndView (P.ej, TallerSpringMVC en Netbeans)
+
+7:20 -> Cadena de filtros (resumen) que se lanzan a partir de "springSecurityFilterChain"
+8:21 -> AQUI NO HAY XML NI ANOTACIONES, ESTÁ HECHO CON JAVA CONFIG
+
+ESTE PROYECTO ES DISTINTO QUE EL OTRO QUE ES IGUAL (fbi), PORQUE ESTE ESTA IMPLEMENTADO CON JAVA CONFIG (la parte de spring security), mientras que el otro está implementado con XML y ANOTACIONES (la parte de SPRING y SPRING MVC).
+
+Interesante, sobre JAVA CONFIG:
+https://www.adictosaltrabajo.com/tutoriales/springjavaconfig/
+(Página muy completa, pero la entenderemos del todo más adelante)
+(Hay una cosa que está mal: decir que todo no se puede hacer con JAVA CONFIG y que se necesita XML no es correcto, ya que este proyecto no tiene nada de XML)
+(Duda: ¿Qué es @Scope("prototype")?)
+
+(Sigue en la celda de al lado)
+
+8:35 -> Ejecutar… ERROR: No bean named 'springSecurityFilterChain' is defined
+DICE QUE AHORA, AL EJECUTAR, APARECE UNA PANTALLA DE LOGIN, LO CUAL NO ES CIERTO
+(y falta definir usuarios y permisos)
+
+8:53 -> Otra clase para hacer eso: ConfiguracionSpringSecurity
+Describe los 2 métodos que tiene esa clase.
+Y AHORA SI FUNCIONA!!: YA NO DA EL ERROR DE ARRIBA, Y SÍ QUE APARECE LA PANTALLA DE LOGIN.
+
+11:13 -> Con lo que hay hasta ahora, ya tenemos lo msmo que nos daba Java EE.
+11:35 -> En vez de la pantalla de login de spring, le decimos que use la nuestra.
+PERO: Ahora ya no sale ninguna pantalla de login.
+En CHROME: ERROR: "localhost te redireccionó demasiadas veces."
+En EDGE: Se produjeron demasiados redireccionamientos.
+Código de error: INET_E_REDIRECT_FAILED
+En FIREFOX: Firefox ha detectado que el servidor está redirigiendo la solicitud a esta dirección de una manera en la que nunca terminará. Este problema a veces está causado por desactivar o rechazar la recepción de cookies.
+
+12:07 -> Los accesos a los distintos directorios del proyecto.
+Después de escribir esto, en CHROME, EDGE,... ya aparece nuestra pantalla de login!!!
+PERO: No pasa de ahí, ponga el usuario que le ponga.
+
+El apartado (5) de pasos.txt da una EXCEPCIÓN
+14:12 -> Cambiando esto, ya pasa a la siguiente pantalla con el usuario "Mulder" y Scully" (en CHROME, ...)
+Los demás usuarios, aún dan un 403
+Y ADEMÁS, ya no da EXCEPCIÓN lo del paso (5) en el index.jsp
+
+PERO: ¿POR QUÉ LO ANTERIOR HA DEJADO DE FUNCIONAR?
+
+(Sigue en la celda de abajo)
+
+15:15 -> Lo de los usuarios (Paso 6, con new Properties), se podría implementar con JDBCo LDAP.
+O si no, escribir mi propio código. Pero esto ahora es muy fácil, con SPRING SECURITY.
+
+15:34 -> Para ello, habría que crear la primera clase que viene en esta pantalla.
+CustomUserDetailsService (que implemente UserDetailsService) => Se guarda en sesión un objeto de tipo UserDetails.
+Pero, SI QUEREMOS QUE SPRING SECURITY USE MI PROPIA CLASE USUARIO (entidad), creo la clase Usuario (que implemente UserDetails)
+
+17:35 -> Dice que hay alguna implementación que hace el CRUD automáticamente... no sé si se refiere a SPRING DATA...
+17:54 -> La BD mínima que se necesita tiene 2 tablas: USERS y AUTHORITIES (que se pueden llamar de otra forma y utilizar ALIAS)
+
+19:10 -> Encriptación de las contraseñas: En JEE sólo se pueden usar los algoritmos que quiera mi servidor. En SS (SPRING SECURITY): BCrypt, PBKDF2, SHA-256, Md5, ... o cq otro que queramos.
+Importante: La ENCRIPTACIÓN no se puede DESENCRIPTAR. Lo único que se puede hacer es pasar el mismo algoritmo para saber si la nueva cadena es igual que la guardada. (ESTO ES ASÍ 100% ??)
+
+21:22 ->De PasswordEncoder hay 2 imports:
+import org.springframework.security.authentication.encoding.PasswordEncoder;  (DEPRECADO)
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+(Sigue en la celda de al lado)
+
+22:05 -> Remember me. En JEE no hay esto.
+(En el jsp no cambiamos nada respecto a lo que ya había al principio)
+24:50 -> En SPRING SECURITY 3, los campos eran j_username y j_password (igual que en JEE)
+
+25:00 -> Si el ACTION del formulario es sobre la misma pantalla de login (así es), entonce SS ve que alguien se quiere autenticar.
+25:27 ->Añadir código en la clase ConfiguracionSpringSecurity (recuerda el login durante 1 día: 86.400 segundos)
+SI MIRAMOS EN EL NAVEGADOR, HAY 2 COOKIES: JSESSIONID (es la cookie de la sesión) y my-remember-me (esta se usará a partir de que finalice la sesión y hasta que caduque ella misma)
+28:38 -> En vez de usar una cookie, se podría guardar (el remember) en una BD.
+
+29:18 -> La frase: "...con inyección de JavaScript te envían esa cookie, que por cierto, Spring coloca como http-only..." => ???
+
+30:40 -> HTTPS (todo encriptado)
+31:06 -> Crear conector SSL en Servidor (Paso 10)
+31:21 -> En principio esto depende del servidor, no de mi aplicación
+31:53 -> Puede ocurrir, que alguien maliciosamente entre a la página inicial de la aplicación (ésta iniciará con HTTPS) y acto seguido cambie en la url del navegador HTTPS (por defecto 8443) por HTTP (por defecto 8080).Solucionar eso por programación es casi imposible.
+SS lo hace fácil, usando un interceptor que vuelva a poner las HTTPS.
+
+HE HECHO LO DE LOS PASOS 9 Y 10 Y.... NO FUNCIONA!!!! Mirar elguna web como:
+https://armandodiaz.wordpress.com/2009/03/14/java-netbeans-ssl-tomcat/
+
+HA FUNCIONADO !!!! CON LO DE ESTAS 2 WEBS:
+https://jalvarus.wordpress.com/2016/09/22/crear-certificados-ssl-autofirmado-para-tomcat-con-java/
+https://ayudaenjava.wordpress.com/2012/07/18/45/
+
+(Sigue en la celda de abajo)
+
+Algo sobre ${catalina.base}:
+https://www.luaces-novo.es/catalina_base_en_apache_tomcat/
+
+Lo del "server.xml" que ha funcionado ha sido esto: (Con el Tomcat 7 del ECLIPSE)
+ <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+           maxThreads="150" SSLEnabled="true" scheme="https" secure="true"
+           clientAuth="false" sslProtocol="TLS"
+           keystoreFile="c:/.Almacen"
+           keystorePass="tomcat" />
+
+TOMCAT BORRA DE VEZ EN CUANDO ESTOS CAMBIOS, DEJANDO EL ORIGINAL
+Probar con: autoDeploy="false" => No, no funciona eso.
+Probar: reloadable="false" => Tampoco funciona.
+
+Fuentes: https://www.enmimaquinafunciona.com/pregunta/3000/por-que-tomcat-como-borrar-mi-contextxml-archivo
+https://www.enmimaquinafunciona.com/pregunta/3000/por-que-tomcat-como-borrar-mi-contextxml-archivo
+
+34:02 -> Punto 11. Control de la expiración de sesiones.
+NOTA: La página "desconectado.jsp" ya estaba funcionando antes de esto.
+DUDA: ¿En cuánto tiempo caduca la sesión?
+35:04 -> Punto 12. Control de la concurrencia de sesiones: Para impedir que entre más de un usuario con las mismas credenciales simultáneamente.
+(Lo del punto 12 ya estaba hecho. Y lo del punto 12-cont, a medias)
+Esto sí funciona.
+DUDA: Punto 13 ¿???? (El 14 y 15 están en 45:15)
+39:00 -> Punto 16. CSRF (Cross Side Request Forgery => Tipo de ataque malintencionado)
+
+(Sigue en la celda de al lado)
+
+45:00 -> El CSRF estaba desactivado a propósito, porque, para activarlo, hay que hacer también el resto de los pasos.
+NOTA: Esto funciona: <xmlns:sec:csrfInput />
+PROBLEMA, ERROR: Activando esto del CSRF, deja de funcionar la pantalla de LOGOUT. (He puesto la consulta en los comentarios del vídeo)
+
+45:15 -> Puntos 14 y 15.(Lo de <sec:authorize...)
+DUDA: ¿Cómo se puede crear una función propia de spEL?
+
+46:48 -> Punto 17. 
+47:30 -> Sobre esto hablan en:
+http://www.forosdelweb.com/f45/utilizar-variable-session-public-class-781672/
+(pero no aclaran mucho. Lo lógico es que, a la sesión se llame desde el controlador, no desde la lógica de negocio, según nos indica la teoría de capas)
+
+OJO!! ESTO NO FUNCIONA: @Secured("ROLE_AGENTE_ESPECIAL,ROLE_DIRECTOR")
+LO CORRECTO ES: @Secured({"ROLE_AGENTE_ESPECIAL", "ROLE_DIRECTOR"})
+
+48:23 -> @Secured es equivalente a @RolesAllowed de JEE
+¿Y EL PUNTO 18?
+49:05 -> Punto 19. @PreAuthorize.
+
+52:00 -> Punto 20. @PostAuthorize y @PostFilter (El antiguo AfterReturningAdvice)
+54:50 -> Punto 21. @PostFilter
+
+(Sigue en la celda de abajo)
+
+54:50 -> Punto 21. @PostFilter
+principal.username es "Mulder", o sea, el usuario con quien nos autenticamos
+
+57:08 -> Punto 22 y 23
+1:00:16 -> roleVoter() -> No lo explica bien
+FUNCIONA!!
+
+
+Falta por explicar:
+ - BotonVolverFilter.java (Creo... que es un filtro para que no funcione el botón de¡l teclado "volver", o sea, el history-1)
+ - PasswordEncoderGenerator.java
+ - RecordarLoginFilter.java (Esto es un filtro que añadimos para que deje el usuario permanente en el input de login)
+ - Punto 13: Session fixation
+ - Punto 18: Seguridad en la invocación de métodos de negocio con anotaciones JSR-250
+
+ 
